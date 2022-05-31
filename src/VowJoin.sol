@@ -18,15 +18,6 @@
 
 pragma solidity 0.8.14;
 
-interface DaiLike {
-    function balanceOf(address) external returns (uint256);
-}
-
-interface DaiJoinLike {
-    function dai() external view returns (address);
-    function join(address, uint256) external;
-}
-
 contract VowJoin {
     /// @dev The DaiJoin adapter from MCD.
     DaiJoinLike public immutable daiJoin;
@@ -50,6 +41,8 @@ contract VowJoin {
         daiJoin = DaiJoinLike(_daiJoin);
         dai = DaiLike(DaiJoinLike(_daiJoin).dai());
         vow = _vow;
+
+        DaiLike(DaiJoinLike(_daiJoin).dai()).approve(_daiJoin, type(uint256).max);
     }
 
     /**
@@ -61,3 +54,14 @@ contract VowJoin {
         emit Join(balance);
     }
 }
+
+interface DaiLike {
+    function approve(address, uint) external;
+    function balanceOf(address) external view returns (uint256);
+}
+
+interface DaiJoinLike {
+    function dai() external view returns (address);
+    function join(address, uint256) external;
+}
+

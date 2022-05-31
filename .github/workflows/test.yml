@@ -4,6 +4,7 @@ on: workflow_dispatch
 
 env:
   FOUNDRY_PROFILE: ci
+  FORK_URL: ${{ secrets.ALCHEMY_GOERLI_ETH_RPC_URL }}
 
 jobs:
   check:
@@ -30,5 +31,5 @@ jobs:
 
       - name: Run Forge tests
         run: |
-          forge test -vvv
+          forge test -vvv --fork-url $FORK_URL
         id: test
