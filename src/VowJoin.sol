@@ -47,8 +47,9 @@ contract VowJoin {
 
     /**
      * @notice Transfers any outstanding Dai balance in this contract to the surplus buffer.
+     * @dev This effectively burns ERC-20 Dai and credits it to the internal Dai balance in the Vat.
      */
-    function join() external {
+    function flush() external {
         uint256 balance = dai.balanceOf(address(this));
         daiJoin.join(vow, balance);
         emit Join(balance);

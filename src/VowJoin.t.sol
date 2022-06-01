@@ -33,7 +33,6 @@ contract VowJoinTest is Test {
     DaiJoinLike internal daiJoin;
     VowJoin internal vowJoin;
     address internal constant VOW = address(0x1337);
-    uint256 internal constant AMOUNT = 1e18;
 
     function setUp() public {
         vat = VatLike(MCD_VAT);
@@ -41,17 +40,16 @@ contract VowJoinTest is Test {
         dai = DaiLike(MCD_DAI);
 
         vowJoin = new VowJoin(address(daiJoin), VOW);
-
-        _mintDai(address(this), AMOUNT);
     }
 
-    function testTransfersAnyOutstandingDaiBalanceToTheVow() public {
-        dai.transfer(address(vowJoin), AMOUNT);
+    function testTransfersAllDaiBalanceToTheVow(uint128 amount) public {
+        _mintDai(address(this), amount);
+        dai.transfer(address(vowJoin), amount);
 
-        vowJoin.join();
+        vowJoin.flush();
 
         assertEq(dai.balanceOf(address(vowJoin)), 0, "Balance of VowJoin is not zero");
-        assertEq(vat.dai(VOW), _rad(AMOUNT), "Vow internal balance not equals to the amount transfereed");
+        assertEq(vat.dai(VOW), _rad(amount), "Vow internal balance not equals to the amount transfereed");
     }
 
     function _mintDai(address usr, uint256 wad) private {
