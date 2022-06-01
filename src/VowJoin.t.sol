@@ -63,33 +63,72 @@ contract VowJoinTest is Test {
     }
 
     function _rad(uint256 wad) private pure returns (uint256) {
-        uint256 RAY = 10**27;
-        return wad * RAY;
+        uint256 ray = 10**27;
+        return wad * ray;
     }
 }
 
 interface VatLike {
     function can(address, address) external view returns (uint256);
+
     function dai(address) external view returns (uint256);
-    function move(address, address, uint256) external;
+
+    function move(
+        address,
+        address,
+        uint256
+    ) external;
 }
 
 interface DaiLike {
-    function approve(address, address, uint256) external;
+    function approve(
+        address,
+        address,
+        uint256
+    ) external;
+
     function transfer(address, uint256) external;
-    function transferFrom(address, address, uint256) external;
+
+    function transferFrom(
+        address,
+        address,
+        uint256
+    ) external;
+
     function pull(address, uint256) external;
+
     function push(address, uint256) external;
-    function move(address, address, uint256) external;
+
+    function move(
+        address,
+        address,
+        uint256
+    ) external;
+
     function mint(address, uint256) external;
+
     function burn(address, uint256) external;
+
     function balanceOf(address usr) external view returns (uint256);
-    function permit(address, address, uint256, uint256, bool, uint8, bytes32, bytes32) external;
+
+    function permit(
+        address,
+        address,
+        uint256,
+        uint256,
+        bool,
+        uint8,
+        bytes32,
+        bytes32
+    ) external;
 }
 
 interface DaiJoinLike {
     function dai() external view returns (DaiLike);
+
     function vat() external view returns (VatLike);
+
     function join(address, uint256) external;
+
     function exit(address, uint256) external;
 }
