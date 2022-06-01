@@ -31,5 +31,5 @@ jobs:
 
       - name: Run Forge Tests
         run: |
-          forge test -vvv --fork-url $FORK_URL
+          forge test -vvv --fork-url=$FORK_URL
         id: test
