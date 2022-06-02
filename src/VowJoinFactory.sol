@@ -22,13 +22,13 @@ import {VowJoin} from "./VowJoin.sol";
 
 contract VowJoinFactory {
     /// @notice registry for VowJoin Addresses. `ilkToVowJoin[ilk]`
-    mapping(bytes32 => address) public ilkToVowJoin;
+    mapping(bytes32 => VowJoin) public ilkToVowJoin;
 
     /// @notice registry of vowJoin addresses to ilks. `vowJoinToIlk[vowJoin]`
-    mapping(address => bytes32) public vowJoinToIlk;
+    mapping(VowJoin => bytes32) public vowJoinToIlk;
 
     /// @notice list of created vowJoins.
-    address[] public vowJoins;
+    VowJoin[] public vowJoins;
 
     /**
      * @notice Vow Join created.
@@ -38,14 +38,11 @@ contract VowJoinFactory {
     event VowJoinCreated(bytes32 indexed ilk, VowJoin indexed vowJoin);
 
     /**
-    * @notice Error event - VowJoin already exists for specified ilk.
-    * @param ilk ilk name.
-    */
+     * @notice Error event - VowJoin already exists for specified ilk.
+     * @param ilk ilk name.
+     */
 
     error VowJoinAlreadyExists(bytes32 ilk);
-
-    constructor() {}
-
 
     /**
      * @notice Create a VowJoin contract.
@@ -53,39 +50,37 @@ contract VowJoinFactory {
      * @param daiJoin daiJoin address.
      * @param vow vow address.
      * @return created VowJoin contract.
-     */ 
+     */
     function createVowJoinAddress(
-      bytes32 ilk,
-      address daiJoin, 
-      address vow
-      ) public returns (VowJoin) {
-        if (ilkToVowJoin[ilk] != address(0)) {
+        bytes32 ilk,
+        address daiJoin,
+        address vow
+    ) public returns (VowJoin) {
+        if (ilkToVowJoin[ilk] != VowJoin(address(0))) {
             revert VowJoinAlreadyExists(ilk);
         }
         VowJoin vowJoin = new VowJoin(daiJoin, vow);
-        vowJoins.push(address(vowJoin));
-        ilkToVowJoin[ilk] = address(vowJoin);
-        vowJoinToIlk[address(vowJoin)] = ilk;
+        vowJoins.push(vowJoin);
+        ilkToVowJoin[ilk] = vowJoin;
+        vowJoinToIlk[vowJoin] = ilk;
         emit VowJoinCreated(ilk, vowJoin);
         return vowJoin;
-      }
-
+    }
 
     /**
-    * @notice returns count of vowJoins.
-    * @return count of vowJoins.
-    */
+     * @notice returns count of vowJoins.
+     * @return count of vowJoins.
+     */
 
-    function count() public view returns (uint) {
+    function count() public view returns (uint256) {
         return vowJoins.length;
     }
 
     /**
-    * @notice returns list of vowJoins.
-    * @return list of vowJoins.
-    */
-    function list() public view returns (address[] memory) {
+     * @notice returns list of vowJoins.
+     * @return list of vowJoins.
+     */
+    function list() public view returns (VowJoin[] memory) {
         return vowJoins;
     }
-  }
-
+}

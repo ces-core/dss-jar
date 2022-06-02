@@ -37,15 +37,36 @@ contract VowJoinFactoryTest is Test {
         bytes32 ilk = "RWAX-A";
         address daiJoin = MCD_JOIN_DAI;
         address vow = 0x0000000000000000000000000000000000000001;
+
         VowJoin created = factory.createVowJoinAddress(ilk, daiJoin, vow);
-        // vm.expectEmit(true, true, false, false, address(factory));
-        // emit VowJoinCreated(ilk, created);
+
         assertEq(factory.count(), 1);
-        assertEq(factory.vowJoins(0), address(created));
-        assertEq(factory.ilkToVowJoin(ilk), address(created));
-        assertEq(factory.vowJoinToIlk(address(created)), ilk);
+        assertEq(address(factory.vowJoins(0)), address(created));
+        assertEq(address(factory.ilkToVowJoin(ilk)), address(created));
+        assertEq(factory.vowJoinToIlk(created), ilk);
+    }
+
+    function testCreateVowJoinAddressEvents() public {
+        bytes32 ilk = "RWAX-A";
+        address daiJoin = MCD_JOIN_DAI;
+        address vow = 0x0000000000000000000000000000000000000001;
+        // This is specific to how Foundry expectEmit woks:
+        // We need to emit the event we want to check BEFORE making the call, however the VowJoin address will only be known AFTER we call it.
+        // It would be cumbersome to derive the address being generated, so we don't bother checking it.
+        vm.expectEmit(true, false, false, false, address(factory));
+        emit VowJoinCreated(ilk, VowJoin(address(0)));
+
+        factory.createVowJoinAddress(ilk, daiJoin, vow);
+    }
+
+    function testRevertOnDuplicateIlk() public {
+        bytes32 ilk = "RWAX-A";
+        address daiJoin = MCD_JOIN_DAI;
+        address vow = 0x0000000000000000000000000000000000000001;
+
+        factory.createVowJoinAddress(ilk, daiJoin, vow);
+
+        vm.expectRevert(abi.encodeWithSelector(VowJoinFactory.VowJoinAlreadyExists.selector, ilk));
+        factory.createVowJoinAddress(ilk, daiJoin, vow);
     }
 }
-
-
-
