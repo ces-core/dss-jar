@@ -25,10 +25,15 @@ contract VowJoin {
     address public immutable vow;
 
     /**
+     * @notice Revert reason when the Dai balance of this contract is zero and `flush` is called.
+     */
+    error Empty();
+
+    /**
      * @notice Emitted when `join` is called.
      * @param amount The outstanding Dai balance when the `join` was called.
      */
-    event Join(uint256 amount);
+    event Flush(uint256 amount);
 
     /**
      * @dev The Dai address is obtained from the DaiJoin contract.
@@ -49,8 +54,13 @@ contract VowJoin {
      */
     function flush() external {
         uint256 balance = dai.balanceOf(address(this));
+
+        if (balance == 0) {
+            revert Empty();
+        }
+
         daiJoin.join(vow, balance);
-        emit Join(balance);
+        emit Flush(balance);
     }
 }
 
