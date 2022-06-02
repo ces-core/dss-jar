@@ -30,8 +30,8 @@ contract VowJoin {
     error Empty();
 
     /**
-     * @notice Emitted when `join` is called.
-     * @param amount The outstanding Dai balance when the `join` was called.
+     * @notice Emitted when `flush` is called.
+     * @param amount The outstanding Dai balance when the `flush` was called.
      */
     event Flush(uint256 amount);
 
