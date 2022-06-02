@@ -7,7 +7,3 @@
 [submodule "lib/solmate"]
 	path = lib/solmate
 	url = https://github.com/Rari-Capital/solmate
-[submodule "lib/mip21-toolkit"]
-	path = lib/mip21-toolkit
-	url = https://github.com/clio-finance/mip21-toolkit
-
