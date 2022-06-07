@@ -16,7 +16,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.14;
 
-contract VowJoin {
+contract Jar {
     /// @dev The DaiJoin adapter from MCD.
     DaiJoinLike public immutable daiJoin;
     /// @dev The Dai token.
@@ -25,15 +25,15 @@ contract VowJoin {
     address public immutable vow;
 
     /**
-     * @notice Revert reason when the Dai balance of this contract is zero and `flush` is called.
+     * @notice Revert reason when the Dai balance of this contract is zero and `flock` is called.
      */
-    error Empty();
+    error EmptyJar();
 
     /**
-     * @notice Emitted when `flush` is called.
-     * @param amount The outstanding Dai balance when the `flush` was called.
+     * @notice Emitted whenever Dai is sent to the `vow`.
+     * @param amount The amount of Dai sent.
      */
-    event Flush(uint256 amount);
+    event Toss(uint256 amount);
 
     /**
      * @dev The Dai address is obtained from the DaiJoin contract.
@@ -49,23 +49,43 @@ contract VowJoin {
     }
 
     /**
-     * @notice Transfers any outstanding Dai balance in this contract to the surplus buffer.
-     * @dev This effectively burns ERC-20 Dai and credits it to the internal Dai balance in the Vat.
+     * @notice Transfers any outstanding Dai balance in this contract to the `vow`.
+     * @dev This effectively burns ERC-20 Dai and credits it to the internal Dai balance of the `vow` in the Vat.
      */
-    function flush() external {
+    function flock() external {
         uint256 balance = dai.balanceOf(address(this));
 
         if (balance == 0) {
-            revert Empty();
+            revert EmptyJar();
         }
 
         daiJoin.join(vow, balance);
-        emit Flush(balance);
+
+        emit Toss(balance);
+    }
+
+    /**
+     * @notice Pulls `wad` amount of Dai from the sender's wallet into the `vow`.
+     * @dev Requires `msg.sender` to have previously `approve`d this contract to spend at least `wad` Dai.
+     * @dev This effectively burns ERC-20 Dai and credits it to the internal Dai balance of the `vow` in the Vat.
+     * @param wad The amount of Dai.
+     */
+    function toss(uint256 wad) external {
+        dai.transferFrom(msg.sender, address(this), wad);
+        daiJoin.join(vow, wad);
+
+        emit Toss(wad);
     }
 }
 
 interface DaiLike {
     function approve(address, uint256) external;
+
+    function transferFrom(
+        address,
+        address,
+        uint256
+    ) external returns (bool);
 
     function balanceOf(address) external view returns (uint256);
 }

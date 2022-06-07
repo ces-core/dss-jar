@@ -19,44 +19,45 @@
 pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
-import {VowJoin} from "./VowJoin.sol";
-import {VowJoinFactory} from "./VowJoinFactory.sol";
+import {Jar} from "./Jar.sol";
+import {JarFactory} from "./JarFactory.sol";
 
 address constant MCD_JOIN_DAI = 0x157c794cE5dAd9F0C42870eaD45Cd9B072A08527;
 
-contract VowJoinFactoryTest is Test {
-    VowJoinFactory internal factory;
+contract JarFactoryTest is Test {
+    JarFactory internal factory;
 
-    event VowJoinCreated(bytes32 indexed ilk, VowJoin indexed vowJoin);
+    event JarCreated(bytes32 indexed ilk, Jar indexed jar);
 
     function setUp() public {
-        factory = new VowJoinFactory();
+        factory = new JarFactory();
     }
 
-    function testCreateVowJoinAddress() public {
+    function testCreateJarAddress() public {
         bytes32 ilk = "RWAX-A";
         address daiJoin = MCD_JOIN_DAI;
         address vow = 0x0000000000000000000000000000000000000001;
 
-        VowJoin created = factory.createVowJoinAddress(ilk, daiJoin, vow);
+        Jar created = factory.createJar(ilk, daiJoin, vow);
 
         assertEq(factory.count(), 1);
-        assertEq(address(factory.vowJoins(0)), address(created));
-        assertEq(address(factory.ilkToVowJoin(ilk)), address(created));
-        assertEq(factory.vowJoinToIlk(created), ilk);
+        assertEq(address(factory.jars(0)), address(created));
+        assertEq(address(factory.ilkToJar(ilk)), address(created));
+        assertEq(factory.jarToIlk(created), ilk);
     }
 
-    function testCreateVowJoinAddressEvents() public {
+    function testCreateJarAddressEvents() public {
         bytes32 ilk = "RWAX-A";
         address daiJoin = MCD_JOIN_DAI;
         address vow = 0x0000000000000000000000000000000000000001;
+
         // This is specific to how Foundry expectEmit woks:
-        // We need to emit the event we want to check BEFORE making the call, however the VowJoin address will only be known AFTER we call it.
+        // We need to emit the event we want to check BEFORE making the call, however the Jar address will only be known AFTER we call it.
         // It would be cumbersome to derive the address being generated, so we don't bother checking it.
         vm.expectEmit(true, false, false, false, address(factory));
-        emit VowJoinCreated(ilk, VowJoin(address(0)));
+        emit JarCreated(ilk, Jar(address(0)));
 
-        factory.createVowJoinAddress(ilk, daiJoin, vow);
+        factory.createJar(ilk, daiJoin, vow);
     }
 
     function testRevertOnDuplicateIlk() public {
@@ -64,9 +65,9 @@ contract VowJoinFactoryTest is Test {
         address daiJoin = MCD_JOIN_DAI;
         address vow = 0x0000000000000000000000000000000000000001;
 
-        factory.createVowJoinAddress(ilk, daiJoin, vow);
+        factory.createJar(ilk, daiJoin, vow);
 
-        vm.expectRevert(abi.encodeWithSelector(VowJoinFactory.VowJoinAlreadyExists.selector, ilk));
-        factory.createVowJoinAddress(ilk, daiJoin, vow);
+        vm.expectRevert(abi.encodeWithSelector(JarFactory.JarAlreadyExists.selector, ilk));
+        factory.createJar(ilk, daiJoin, vow);
     }
 }

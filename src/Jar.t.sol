@@ -17,52 +17,94 @@
 pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
-import {VowJoin} from "./VowJoin.sol";
+import {Jar} from "./Jar.sol";
 
 // Contracts from CES MCD on Goerli
 address constant MCD_VAT = 0xDEcab25Ce117b3acB149E21e6A70acEF57aB89cA;
 address constant MCD_DAI = 0x1Dd2f5799F83A5bD045F656Cd85a06F1C078183D;
 address constant MCD_JOIN_DAI = 0x157c794cE5dAd9F0C42870eaD45Cd9B072A08527;
 
-contract VowJoinTest is Test {
+contract JarTest is Test {
     using stdStorage for StdStorage;
 
     VatLike internal vat;
     DaiLike internal dai;
     DaiJoinLike internal daiJoin;
-    VowJoin internal vowJoin;
+    Jar internal jar;
     address internal constant VOW = address(0x1337);
 
-    event Flush(uint256 amount);
+    event Toss(uint256 amount);
 
     function setUp() public {
         vat = VatLike(MCD_VAT);
         daiJoin = DaiJoinLike(MCD_JOIN_DAI);
         dai = DaiLike(MCD_DAI);
 
-        vowJoin = new VowJoin(address(daiJoin), VOW);
+        jar = new Jar(address(daiJoin), VOW);
     }
 
-    function testTransfersAllDaiBalanceToTheVow(uint128 amount) public {
+    function testFlockSendsAllDaiBalanceToTheVow(uint128 amount) public {
         // Make sure amount is not zero
         amount = (amount % (type(uint128).max - 1)) + 1;
 
         _mintDai(address(this), amount);
-        dai.transfer(address(vowJoin), amount);
+        dai.transfer(address(jar), amount);
 
-        vm.expectEmit(false, false, false, true, address(vowJoin));
-        emit Flush(amount);
+        jar.flock();
 
-        vowJoin.flush();
-
-        assertEq(dai.balanceOf(address(vowJoin)), 0, "Balance of VowJoin is not zero");
+        assertEq(dai.balanceOf(address(jar)), 0, "Balance of Jar is not zero");
         assertEq(vat.dai(VOW), _rad(amount), "Vow internal balance not equals to the amount transfereed");
     }
 
-    function testRevertDaiBalanceIsZero() public {
-        vm.expectRevert(VowJoin.Empty.selector);
+    function testFlockEmitsTheTossEventWithTheProperAmount(uint128 amount) public {
+        // Make sure amount is not zero
+        amount = (amount % (type(uint128).max - 1)) + 1;
 
-        vowJoin.flush();
+        _mintDai(address(this), amount);
+        dai.transfer(address(jar), amount);
+
+        vm.expectEmit(false, false, false, true, address(jar));
+        emit Toss(amount);
+
+        jar.flock();
+    }
+
+    function testRevertFlockWhenDaiBalanceIsZero() public {
+        vm.expectRevert(Jar.EmptyJar.selector);
+
+        jar.flock();
+    }
+
+    function testTossPullsDaiFromSenderIntoTheVow(uint128 amount) public {
+        // Make sure amount is not zero
+        amount = (amount % (type(uint128).max - 1)) + 1;
+
+        _mintDai(address(this), amount);
+        dai.approve(address(jar), amount);
+
+        uint256 senderBalanceBefore = dai.balanceOf(address(this));
+        uint256 vowBalanceBefore = vat.dai(VOW);
+
+        jar.toss(amount);
+
+        uint256 senderBalanceAfter = dai.balanceOf(address(this));
+        uint256 vowBalanceAfter = vat.dai(VOW);
+
+        assertEq(senderBalanceAfter, senderBalanceBefore - amount, "Balance of sender not reduced correctly");
+        assertEq(vowBalanceAfter, vowBalanceBefore + _rad(amount), "Balance of vow not increased correctly");
+    }
+
+    function testTossEmitsTheTossEventWithTheProperAmount(uint128 amount) public {
+        // Make sure amount is not zero
+        amount = (amount % (type(uint128).max - 1)) + 1;
+
+        _mintDai(address(this), amount);
+        dai.approve(address(jar), amount);
+
+        vm.expectEmit(false, false, false, true, address(jar));
+        emit Toss(amount);
+
+        jar.toss(amount);
     }
 
     function _mintDai(address usr, uint256 wad) private {
@@ -92,11 +134,7 @@ interface VatLike {
 }
 
 interface DaiLike {
-    function approve(
-        address,
-        address,
-        uint256
-    ) external;
+    function approve(address, uint256) external;
 
     function transfer(address, uint256) external;
 
