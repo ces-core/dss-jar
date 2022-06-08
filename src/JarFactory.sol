@@ -21,10 +21,10 @@ pragma solidity 0.8.14;
 import {Jar} from "./Jar.sol";
 
 contract JarFactory {
-    /// @notice registry for Jar Addresses. `ilkToJar[ilk]`
+    /// @notice registry for Jar Addresses. `ilkToJar[ilk]`.
     mapping(bytes32 => Jar) public ilkToJar;
 
-    /// @notice registry of jar addresses to ilks. `jarToIlk[jar]`
+    /// @notice registry of jar addresses to ilks. `jarToIlk[jar]`.
     mapping(Jar => bytes32) public jarToIlk;
 
     /// @notice list of created jars.
@@ -41,7 +41,6 @@ contract JarFactory {
      * @notice Error event - Jar already exists for specified ilk.
      * @param ilk ilk name.
      */
-
     error JarAlreadyExists(bytes32 ilk);
 
     /**
@@ -75,7 +74,6 @@ contract JarFactory {
      * @notice returns count of jars.
      * @return count of jars.
      */
-
     function count() public view returns (uint256) {
         return jars.length;
     }
