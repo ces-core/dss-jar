@@ -1,66 +1,25 @@
 #!/bin/bash
 set -eo pipefail
 
+source "${BASH_SOURCE%/*}/_common.sh"
+
 function deploy() {
-  local ENV_FILE="${BASH_SOURCE%/*}/../.env"
-  [ -f "$ENV_FILE" ] && source "$ENV_FILE"
+  normalize-env-vars
 
-  FOUNDRY_ETH_FROM="${FOUNDRY_ETH_FROM:-$ETH_FROM}"
-  FOUNDRY_ETHERSCAN_API_KEY="${FOUNDRY_ETHERSCAN_API_KEY:-$ETHERSCAN_API_KEY}"
-  FOUNDRY_ETH_KEYSTORE_DIRECTORY="${FOUNDRY_ETH_KEYSTORE_DIRECTORY:-$ETH_KEYSTORE}"
-
-  if [ -z "$FOUNDRY_ETH_KEYSTORE_FILE" ]; then
-    [ -z "$FOUNDRY_ETH_KEYSTORE_DIRECTORY" ] && die "$(err_msg_keystore_file)"
-    # Foundy expects the Ethereum Keystore file, not the directory.
-    # This step assumes the Keystore file for the deployed wallet includes $ETH_FROM in its name.
-    FOUNDRY_ETH_KEYSTORE_FILE="${FOUNDRY_ETH_KEYSTORE_DIRECTORY%/}/$(ls -1 $FOUNDRY_ETH_KEYSTORE_DIRECTORY | \
-      # -i: case insensitive
-      # #0x: strip the 0x prefix from the the address
-      grep -i ${FOUNDRY_ETH_FROM#0x})"
-  fi
-  [ -z "$FOUNDRY_ETH_KEYSTORE_FILE" ] && die "$(err_msg_keystore_file)"
-
-  # Handle reading from the password file
-  local PASSWORD_OPT=''
-  if [ -f "$FOUNDRY_ETH_PASSWORD_FILE" ]; then
-    PASSWORD_OPT="--password=$(cat "$FOUNDRY_ETH_PASSWORD_FILE")"
+  local PASSWORD=$(extract-password)
+  if [ -n "$PASSWORD" ]; then
+    PASSWORD_OPT="--password=${PASSWORD}"
   fi
 
-  # Require the Etherscan API Key if --verify option is enabled
-  set +e
-  if grep -- '--verify' <<< "$@" > /dev/null; then
-    [ -z "$FOUNDRY_ETHERSCAN_API_KEY" ] && die "$(err_msg_etherscan_api_key)"
-  fi
-  set -e
+  check-required-etherscan-api-key
 
   # Log the command being issued, making sure not to expose the password
   log "forge create --keystore="$FOUNDRY_ETH_KEYSTORE_FILE" $(sed 's/=.*$/=[REDACTED]/' <<<${PASSWORD_OPT}) $@"
-  # forge create --keystore="$FOUNDRY_ETH_KEYSTORE_FILE" ${PASSWORD_OPT} $@
+  forge create --keystore="$FOUNDRY_ETH_KEYSTORE_FILE" ${PASSWORD_OPT} $@
 }
 
-function log() {
-  echo -e "$@" >&2
-}
-
-function die() {
-  log "$@"
-  log ""
-  exit 1
-}
-
-function err_msg_keystore_file() {
-cat <<MSG
-ERROR: could not determine the location of the keystore file.
-
-You should either define:
-
-\t1. The FOUNDRY_ETH_KEYSTORE_FILE env var or;
-\t2. Both FOUNDRY_ETH_KEYSTORE_DIR and FOUNDRY_ETH_FROM env vars.
-MSG
-}
-
-function err_msg_etherscan_api_key() {
-cat <<MSG
+function check-required-etherscan-api-key() {
+  local msg=$(cat <<MSG
 ERROR: cannot verify contracts without ETHERSCAN_API_KEY being set.
 
 You should either:
@@ -68,6 +27,14 @@ You should either:
 \t1. Not use the --verify flag or;
 \t2. Define the ETHERSCAN_API_KEY env var.
 MSG
+  )
+
+  # Require the Etherscan API Key if --verify option is enabled
+  set +e
+  if grep -- '--verify' <<< "$@" > /dev/null; then
+    [ -n "$FOUNDRY_ETHERSCAN_API_KEY" ] || die "$msg"
+  fi
+  set -e
 }
 
 function usage() {

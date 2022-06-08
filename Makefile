@@ -16,3 +16,10 @@ test:; forge test -vvv --fork-url=$(ETH_RPC_URL)
 
 # Deploy
 deploy:; @scripts/deploy.sh --verify src/JarFactory.sol:JarFactory
+
+# Create Jar
+create-jar:; @scripts/create-jar.sh --verify --factory=$(factory) --ilk=$(ilk) --dai-join=$(dai_join) --vow=$(vow)
+
+# Verify a contract
+verify_opts ?=
+verify:; @scripts/verify.sh --address=$(address) --contract=$(contract) $(verify_opts)
