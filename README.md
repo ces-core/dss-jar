@@ -172,7 +172,7 @@ make verify \
 make verify \
     address=<address> \
     contract=src/Jar.sol:Jar \
-    verify_opts="--constructor-args=$(cast abi-encode 'constructor(address,address)' "$MCD_JOIN_DAI" "$MCD_VOW")"
+    verify_opts="--constructor-args=\$(cast abi-encode 'constructor(address,address)' "$MCD_JOIN_DAI" "$MCD_VOW")"
 ```
 
 ## Contributing

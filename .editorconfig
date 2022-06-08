@@ -6,15 +6,19 @@ root = true
 # Unix-style newlines with a newline ending every file
 [*]
 end_of_line = lf
-insert_final_newline = true
 indent_size = 2
 indent_style = space
-
-# 4 space indentation
-[*.md,Makefile]
-indent_style = space
-indent_size = 4
 
 # Tab indentation (no size specified)
 [Makefile]
 indent_style = tab
+indent_size = 4
+
+[*.sh]
+shell_variant      = posix
+binary_next_line   = true
+switch_case_indent = true
+space_redirects    = true
+keep_padding       = true
+function_next_line = true
+never_split        = true
