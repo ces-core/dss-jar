@@ -8,7 +8,7 @@ function create-jar() {
   local ILK="$2"
   local DAI_JOIN="$3"
   local VOW=$4
-  shift 4;
+  shift 4
 
   normalize-env-vars
 
@@ -41,14 +41,14 @@ MSG
 
   sleep 13s
   set +e
-  if grep -- '--verify' <<< "$@" > /dev/null; then
+  if grep -- '--verify' <<<"$@" >/dev/null; then
     ${BASH_SOURCE%/*}/verify.sh --address="$JAR" --contract='src/Jar.sol:Jar' --constructor-args="$(cast abi-encode 'constructor(address,address)' $DAI_JOIN $VOW)" >&2
   fi
   set -e
 }
 
 function usage() {
-cat <<MSG
+  cat <<MSG
 create-jar.sh --factory <factory_address> \\
   --ilk <ascii_encoded_ilk> \\
   --dai-join <dai_join_address> \\
@@ -69,60 +69,60 @@ if [ "$0" = "$BASH_SOURCE" ]; then
 
   while getopts "$optspec" OPT; do
     # support long options: https://stackoverflow.com/a/28466267/519360
-    if [ "$OPT" = "-" ]; then   # long option: reformulate OPT and OPTARG
-      OPT="${OPTARG%%=*}"       # extract long option name
-      OPTARG="${OPTARG#$OPT}"   # extract long option argument (may be empty)
-      OPTARG="${OPTARG#=}"      # if long option argument, remove assigning `=`
+    if [ "$OPT" = "-" ]; then # long option: reformulate OPT and OPTARG
+      OPT="${OPTARG%%=*}"     # extract long option name
+      OPTARG="${OPTARG#$OPT}" # extract long option argument (may be empty)
+      OPTARG="${OPTARG#=}"    # if long option argument, remove assigning `=`
     fi
 
     case "$OPT" in
-      h | help)
-        usage
-        exit 0
-        ;;
-      factory)
-        [ -z "$OPTARG" ] && {
-          log "\n--factory option is missing its argument\n"
-          die "$(usage)"
-        }
-        factory="$OPTARG"
-        ;;
-      ilk)
-        [ -z "$OPTARG" ] && {
-          log "\n--ilk option is missing its argument\n"
-          die "$(usage)"
-        }
-        ilk="$OPTARG"
-        ;;
-      dai-join)
-        [ -z "$OPTARG" ] && {
-          log "\n--dai-join option is missing its argument\n"
-          die "$(usage)"
-        }
-        dai_join="$OPTARG"
-        ;;
-      vow)
-        [ -z "$OPTARG" ] && {
-          log "\n--vow option is missing its argument\n"
-          die "$(usage)"
-        }
-        vow="$OPTARG"
-        ;;
-      verify)
-        verify=1
-        ;;
-      ??*)
-        # bad long option
-        log "\nIllegal option --$OPT\n"
+    h | help)
+      usage
+      exit 0
+      ;;
+    factory)
+      [ -z "$OPTARG" ] && {
+        log "\n--factory option is missing its argument\n"
         die "$(usage)"
-        ;;
-      ?)
-        log "\nIllegal option -${BOLD}$OPTARG${OFF}\n"
+      }
+      factory="$OPTARG"
+      ;;
+    ilk)
+      [ -z "$OPTARG" ] && {
+        log "\n--ilk option is missing its argument\n"
         die "$(usage)"
-        ;;
+      }
+      ilk="$OPTARG"
+      ;;
+    dai-join)
+      [ -z "$OPTARG" ] && {
+        log "\n--dai-join option is missing its argument\n"
+        die "$(usage)"
+      }
+      dai_join="$OPTARG"
+      ;;
+    vow)
+      [ -z "$OPTARG" ] && {
+        log "\n--vow option is missing its argument\n"
+        die "$(usage)"
+      }
+      vow="$OPTARG"
+      ;;
+    verify)
+      verify=1
+      ;;
+    ??*)
+      # bad long option
+      log "\nIllegal option --$OPT\n"
+      die "$(usage)"
+      ;;
+    ?)
+      log "\nIllegal option -${BOLD}$OPTARG${OFF}\n"
+      die "$(usage)"
+      ;;
     esac
   done
-  shift $((OPTIND-1))
+  shift $((OPTIND - 1))
 
   if [ -z "$factory" ] || [ -z "$ilk" ] || [ -z "$dai_join" ] || [ -z "$vow" ]; then
     die "$(usage)"

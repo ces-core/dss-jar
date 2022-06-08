@@ -10,7 +10,7 @@ function normalize-env-vars() {
     [ -z "$FOUNDRY_ETH_KEYSTORE_DIRECTORY" ] && die "$(err-msg-keystore-file)"
     # Foundy expects the Ethereum Keystore file, not the directory.
     # This step assumes the Keystore file for the deployed wallet includes $ETH_FROM in its name.
-    export FOUNDRY_ETH_KEYSTORE_FILE="${FOUNDRY_ETH_KEYSTORE_DIRECTORY%/}/$(ls -1 $FOUNDRY_ETH_KEYSTORE_DIRECTORY | \
+    export FOUNDRY_ETH_KEYSTORE_FILE="${FOUNDRY_ETH_KEYSTORE_DIRECTORY%/}/$(ls -1 $FOUNDRY_ETH_KEYSTORE_DIRECTORY |
       # -i: case insensitive
       # #0x: strip the 0x prefix from the the address
       grep -i ${FOUNDRY_ETH_FROM#0x})"
@@ -20,7 +20,7 @@ function normalize-env-vars() {
 }
 
 # Handle reading from the password file
-function extract-password () {
+function extract-password() {
   [ -f "$FOUNDRY_ETH_PASSWORD_FILE" ] && cat "$FOUNDRY_ETH_PASSWORD_FILE"
 }
 
@@ -35,7 +35,7 @@ function die() {
 }
 
 function err-msg-keystore-file() {
-cat <<MSG
+  cat <<MSG
 ERROR: could not determine the location of the keystore file.
 
 You should either define:
@@ -44,4 +44,3 @@ You should either define:
 \t2. Both FOUNDRY_ETH_KEYSTORE_DIR and FOUNDRY_ETH_FROM env vars.
 MSG
 }
-

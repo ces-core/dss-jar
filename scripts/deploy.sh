@@ -19,7 +19,8 @@ function deploy() {
 }
 
 function check-required-etherscan-api-key() {
-  local msg=$(cat <<MSG
+  local msg=$(
+    cat <<MSG
 ERROR: cannot verify contracts without ETHERSCAN_API_KEY being set.
 
 You should either:
@@ -31,14 +32,14 @@ MSG
 
   # Require the Etherscan API Key if --verify option is enabled
   set +e
-  if grep -- '--verify' <<< "$@" > /dev/null; then
+  if grep -- '--verify' <<<"$@" >/dev/null; then
     [ -n "$FOUNDRY_ETHERSCAN_API_KEY" ] || die "$msg"
   fi
   set -e
 }
 
 function usage() {
-cat <<MSG
+  cat <<MSG
 deploy.sh contract_path [--constructor-args ...args]
 
 Examples:
