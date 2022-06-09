@@ -21,68 +21,25 @@ pragma solidity 0.8.14;
 import {Jar} from "./Jar.sol";
 
 contract JarFactory {
-  /// @notice registry for Jar Addresses. `ilkToJar[ilk]`.
-  mapping(bytes32 => Jar) public ilkToJar;
-
-  /// @notice registry of jar addresses to ilks. `jarToIlk[jar]`.
-  mapping(Jar => bytes32) public jarToIlk;
-
-  /// @notice list of created jars.
-  Jar[] public jars;
-
   /**
-   * @notice Vow Join created.
-   * @param ilk ilk name.
-   * @param jar address of vow join.
+   * @notice Jar created.
+   * @param daiJoin daiJoin address.
+   * @param vow vow address.
+   * @param jar the address of the Jar created.
    */
-  event JarCreated(bytes32 indexed ilk, Jar indexed jar);
-
-  /**
-   * @notice Error event - Jar already exists for specified ilk.
-   * @param ilk ilk name.
-   */
-  error JarAlreadyExists(bytes32 ilk);
+  event JarCreated(address indexed daiJoin, address indexed vow, Jar jar);
 
   /**
    * @notice Create a Jar contract.
-   * @param ilk ilk name.
    * @param daiJoin daiJoin address.
    * @param vow vow address.
    * @return created Jar contract.
    */
-  function createJar(
-    bytes32 ilk,
-    address daiJoin,
-    address vow
-  ) public returns (Jar) {
-    if (ilkToJar[ilk] != Jar(address(0))) {
-      revert JarAlreadyExists(ilk);
-    }
-
+  function newJar(address daiJoin, address vow) public returns (Jar) {
     Jar jar = new Jar(daiJoin, vow);
 
-    jars.push(jar);
-    ilkToJar[ilk] = jar;
-    jarToIlk[jar] = ilk;
-
-    emit JarCreated(ilk, jar);
+    emit JarCreated(daiJoin, vow, jar);
 
     return jar;
-  }
-
-  /**
-   * @notice returns count of jars.
-   * @return count of jars.
-   */
-  function count() public view returns (uint256) {
-    return jars.length;
-  }
-
-  /**
-   * @notice returns list of jars.
-   * @return list of jars.
-   */
-  function list() public view returns (Jar[] memory) {
-    return jars;
   }
 }
