@@ -1,3 +1,12 @@
+⚠️⚠️⚠️
+
+**THIS REPOSITORY IS EXPERIMENTAL AND SHOULD NOT BE USED AS IT IS.**  
+**FOR NOW IT HAS BEEN ARCHIVED AND WILL BE KEPT ONLY AS A REFERENCE.**
+
+If you are looking for how to make payments of stability fees directly into the surplus buffer in the context of Real World Assets (RWA), please refer to [`mip21-toolkit`](https://github.com/clio-finance/mip21-toolkit).
+
+⚠️⚠️⚠️
+
 # DSS Jar
 
 DSS module to simplify payments directly to Dai **Surplus Buffer**.
