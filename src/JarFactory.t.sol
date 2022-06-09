@@ -25,49 +25,49 @@ import {JarFactory} from "./JarFactory.sol";
 address constant MCD_JOIN_DAI = 0x157c794cE5dAd9F0C42870eaD45Cd9B072A08527;
 
 contract JarFactoryTest is Test {
-    JarFactory internal factory;
+  JarFactory internal factory;
 
-    event JarCreated(bytes32 indexed ilk, Jar indexed jar);
+  event JarCreated(bytes32 indexed ilk, Jar indexed jar);
 
-    function setUp() public {
-        factory = new JarFactory();
-    }
+  function setUp() public {
+    factory = new JarFactory();
+  }
 
-    function testCreateJarAddress() public {
-        bytes32 ilk = "RWAX-A";
-        address daiJoin = MCD_JOIN_DAI;
-        address vow = 0x0000000000000000000000000000000000000001;
+  function testCreateJarAddress() public {
+    bytes32 ilk = "RWAX-A";
+    address daiJoin = MCD_JOIN_DAI;
+    address vow = 0x0000000000000000000000000000000000000001;
 
-        Jar created = factory.createJar(ilk, daiJoin, vow);
+    Jar created = factory.createJar(ilk, daiJoin, vow);
 
-        assertEq(factory.count(), 1);
-        assertEq(address(factory.jars(0)), address(created));
-        assertEq(address(factory.ilkToJar(ilk)), address(created));
-        assertEq(factory.jarToIlk(created), ilk);
-    }
+    assertEq(factory.count(), 1);
+    assertEq(address(factory.jars(0)), address(created));
+    assertEq(address(factory.ilkToJar(ilk)), address(created));
+    assertEq(factory.jarToIlk(created), ilk);
+  }
 
-    function testCreateJarAddressEvents() public {
-        bytes32 ilk = "RWAX-A";
-        address daiJoin = MCD_JOIN_DAI;
-        address vow = 0x0000000000000000000000000000000000000001;
+  function testCreateJarAddressEvents() public {
+    bytes32 ilk = "RWAX-A";
+    address daiJoin = MCD_JOIN_DAI;
+    address vow = 0x0000000000000000000000000000000000000001;
 
-        // This is specific to how Foundry expectEmit woks:
-        // We need to emit the event we want to check BEFORE making the call, however the Jar address will only be known AFTER we call it.
-        // It would be cumbersome to derive the address being generated, so we don't bother checking it.
-        vm.expectEmit(true, false, false, false, address(factory));
-        emit JarCreated(ilk, Jar(address(0)));
+    // This is specific to how Foundry expectEmit woks:
+    // We need to emit the event we want to check BEFORE making the call, however the Jar address will only be known AFTER we call it.
+    // It would be cumbersome to derive the address being generated, so we don't bother checking it.
+    vm.expectEmit(true, false, false, false, address(factory));
+    emit JarCreated(ilk, Jar(address(0)));
 
-        factory.createJar(ilk, daiJoin, vow);
-    }
+    factory.createJar(ilk, daiJoin, vow);
+  }
 
-    function testRevertOnDuplicateIlk() public {
-        bytes32 ilk = "RWAX-A";
-        address daiJoin = MCD_JOIN_DAI;
-        address vow = 0x0000000000000000000000000000000000000001;
+  function testRevertOnDuplicateIlk() public {
+    bytes32 ilk = "RWAX-A";
+    address daiJoin = MCD_JOIN_DAI;
+    address vow = 0x0000000000000000000000000000000000000001;
 
-        factory.createJar(ilk, daiJoin, vow);
+    factory.createJar(ilk, daiJoin, vow);
 
-        vm.expectRevert(abi.encodeWithSelector(JarFactory.JarAlreadyExists.selector, ilk));
-        factory.createJar(ilk, daiJoin, vow);
-    }
+    vm.expectRevert(abi.encodeWithSelector(JarFactory.JarAlreadyExists.selector, ilk));
+    factory.createJar(ilk, daiJoin, vow);
+  }
 }

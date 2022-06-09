@@ -45,13 +45,13 @@ A `Jar` implements the following interface:
 interface JarLike {
   function toss(uint256 wad) external;
 
-  function flock() external;
+  function void() external;
 }
 
 ```
 
 - `toss(uint256 wad)`: pulls Dai from the sender&rsquo;s wallet and send it to the Surplus Buffer atomically.
-- `flock()`: flushes any Dai balance of the `Jar` to the Surplus Buffer. Any Dai sent directly to it will simply accumulate until someone calls this function.
+- `void()`: flushes any Dai balance of the `Jar` to the Surplus Buffer. Any Dai sent directly to it will simply accumulate until someone calls this function.
 
 Effectively the 2 functions above will:
 
@@ -70,7 +70,7 @@ RWA partners can simply send Dai to the `Jar` address related to the deal and so
 
 ## Usage
 
-`Jar` instances can be easily created by the companion factory `JarFactory` (look for `JAR_FAB` in DSS chainlog):
+`Jar` instances can be easily created by the companion factory `JarFactory`. Look for `JAR_FAB` in [DSS chainlog](https://chainlog.makerdao.com/) for the official MCD deployments (Goerli and Mainnet) or in this [reference file](https://github.com/clio-finance/ces-goerli-mcd/blob/master/contracts.json) for CES MCD on Goerli:
 
 ```solidity
 interface JarFactoryLike {
@@ -92,10 +92,10 @@ To obtain the parameters you can:
   cast --from-ascii 'RWA010-A' # change to the actual ILK representing the deal
   ```
 - `address daiJoin` and `adress vow`
-  - For the official MCD deployments (both Goerli and Mainnet), go to the [chainlog](https://chainlog.makerdao.com/) and look for:
+  - For the official MCD deployments (Goerli and Mainnet), go to the [chainlog](https://chainlog.makerdao.com/) and look for:
     - `MCD_DAI_JOIN`
     - `MCD_VOW`
-  - For CES MCD on Goerli, go to the [reference repo](https://github.com/clio-finance/ces-goerli-mcd/blob/master/contracts.json) and look for:
+  - For CES MCD on Goerli, go to the [reference file](https://github.com/clio-finance/ces-goerli-mcd/blob/master/contracts.json) and look for:
     - `MCD_DAI_JOIN`
     - `MCD_VOW`
 
@@ -151,9 +151,9 @@ Usage:
 
 ```bash
 make create-jar factory='<FACTORY_ADDRESS>' \
-    ilk=$(cast --from-ascii '<ILK_NAME>') \
-    dai_join=$MCD_JOIN_DAI \
-    vow=$MCD_VOW
+  ilk=$(cast --from-ascii '<ILK_NAME>') \
+  dai_join=$MCD_JOIN_DAI \
+  vow=$MCD_VOW
 ```
 
 #### `make verify`
@@ -165,14 +165,14 @@ Usage:
 ```bash
 # Without constructor args:
 make verify \
-    address=<address> \
-    contract=src/JarFactory.sol:JarFactory
+  address=<address> \
+  contract=src/JarFactory.sol:JarFactory
 
 # With constructor args:
 make verify \
-    address=<address> \
-    contract=src/Jar.sol:Jar \
-    verify_opts="--constructor-args=\$(cast abi-encode 'constructor(address,address)' "$MCD_JOIN_DAI" "$MCD_VOW")"
+  address=<address> \
+  contract=src/Jar.sol:Jar \
+  verify_opts="--constructor-args=\$(cast abi-encode 'constructor(address,address)' "$MCD_JOIN_DAI" "$MCD_VOW")"
 ```
 
 ## Contributing

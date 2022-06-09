@@ -1,4 +1,4 @@
 {
   "*.{md,sol,toml}": "prettier --write",
-  "*.{sh}": "shfmt -w"
+  "*.sh": "shfmt -w"
 }
